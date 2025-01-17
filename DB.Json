@@ -1,1 +1,1 @@
-{"key": "newValue"}
+{"posts": [ {"id": 100, "title": "json-server", "author": "typicoke" }], "comments": [ {"id": 100, "body": "some comment", "postId": 1} ], "profile": {"name": "typicode"}}
