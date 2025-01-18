@@ -1,1 +1,1 @@
-{"products":[{"id":1,"name":"Jute","price":450,"deleted":false},{"id":2,"name":"Satin","price":400,"deleted":false}],"stockinhand":[{"id":1,"productId":1,"date":"2025-01-18","incomingCount":100,"totalCount":100}]}
+{"products":[{"id":1,"name":"Jute","price":450,"deleted":false},{"id":2,"name":"Satin","price":400,"deleted":false}],"stockinhand":[{"id":1,"productId":1,"date":"2025-01-18","incomingCount":100,"totalCount":100},{"id":2,"productId":1,"date":"2025-01-18","incomingCount":100,"totalCount":100}]}
