@@ -1,0 +1,87 @@
+/* Main styles for AI Scrum Master */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+/* Chat styles */
+#chat-box {
+    min-height: 300px;
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 15px;
+    background-color: #fff;
+}
+
+.message {
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border-radius: 10px;
+    max-width: 80%;
+}
+
+.system-message {
+    background-color: #f8f9fa;
+    border-left: 4px solid #6c757d;
+    width: 100%;
+    max-width: 100%;
+}
+
+.user-message {
+    background-color: #d1ecf1;
+    border-left: 4px solid #0dcaf0;
+    margin-left: auto;
+}
+
+.ai-message {
+    background-color: #e2e3e5;
+    border-left: 4px solid #6c757d;
+}
+
+/* Card styles */
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    font-weight: bold;
+    background-color: #f1f8ff;
+}
+
+/* Button styles */
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+/* Alert styles */
+.alert-info {
+    background-color: #cff4fc;
+    border-color: #b6effb;
+}
+
+/* Footer styles */
+footer {
+    color: #6c757d;
+    padding: 20px 0;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .message {
+        max-width: 90%;
+    }
+}

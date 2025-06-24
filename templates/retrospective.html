@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrospective - AI Scrum Master</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="text-center my-4">
+            <h1>AI Scrum Master</h1>
+            <h2>Sprint Retrospective</h2>
+        </header>
+        
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Navigation
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="/" class="list-group-item list-group-item-action">Home</a>
+                        <a href="/daily-scrum" class="list-group-item list-group-item-action">Daily Scrum</a>
+                        <a href="/sprint-planning" class="list-group-item list-group-item-action">Sprint Planning</a>
+                        <a href="/sprint-review" class="list-group-item list-group-item-action">Sprint Review</a>
+                        <a href="/retrospective" class="list-group-item list-group-item-action active">Retrospective</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header">
+                        Retrospective Assistant
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <p><strong>Retrospective Guidelines:</strong></p>
+                            <ul>
+                                <li>Time-boxed to 3 hours for a one-month Sprint (proportionally less for shorter Sprints)</li>
+                                <li>Discuss what went well, what could be improved, and how to implement improvements</li>
+                                <li>Focus on the team, processes, and tools</li>
+                                <li>Create actionable improvements for the next Sprint</li>
+                            </ul>
+                        </div>
+                        
+                        <div id="chat-box" class="mb-3">
+                            <div class="message system-message">
+                                <p>Welcome to the Sprint Retrospective! I'll help facilitate this session using a structured approach:</p>
+                                <p>1. What went well during the Sprint?</p>
+                                <p>2. What could be improved?</p>
+                                <p>3. What specific actions can we take to improve?</p>
+                                <p>Let's start with what went well during this Sprint. Would anyone like to share?</p>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <input type="text" id="user-input" class="form-control" placeholder="Type your message here...">
+                            <button id="send-btn" class="btn btn-primary">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="text-center mt-4">
+            <p>AI Scrum Master - Powered by Ollama with Mistral and Azure</p>
+        </footer>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/retrospective.js"></script>
+</body>
+</html>
