@@ -6,3 +6,7 @@ requests==2.31.0
 azure-identity==1.14.0
 azure-storage-blob==12.18.0
 pydantic==2.4.2
+gTTS==2.3.2
+pyttsx3==2.90
+SpeechRecognition==3.10.0
+pyaudio==0.2.13

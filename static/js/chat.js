@@ -11,9 +11,81 @@ document.addEventListener('DOMContentLoaded', function() {
             content: 'Hi there! I\'m Alex, your Scrum Master. I\'ve been working with Agile teams for about 8 years now. How can I help you with your Scrum practices today?'
         }
     ];
-    
-    // Name detection for personalization
+      // Name detection for personalization
     let userName = '';
+    
+    // Voice settings
+    let voiceEnabled = false;
+    let isListening = false;
+    
+    // Create voice control buttons
+    const voiceControlsDiv = document.createElement('div');
+    voiceControlsDiv.className = 'voice-controls mb-3';
+    voiceControlsDiv.innerHTML = `
+        <button id="toggle-voice" class="btn btn-outline-secondary">
+            <i class="fas fa-microphone-slash"></i> Enable Voice
+        </button>
+        <button id="start-listening" class="btn btn-outline-primary" disabled>
+            <i class="fas fa-microphone"></i> Start Listening
+        </button>
+    `;
+    
+    // Insert voice controls before the chat box
+    chatBox.parentNode.insertBefore(voiceControlsDiv, chatBox);
+    
+    // Get voice control buttons
+    const toggleVoiceBtn = document.getElementById('toggle-voice');
+    const startListeningBtn = document.getElementById('start-listening');
+    
+    // Toggle voice controls
+    toggleVoiceBtn.addEventListener('click', function() {
+        voiceEnabled = !voiceEnabled;
+        if (voiceEnabled) {
+            toggleVoiceBtn.innerHTML = '<i class="fas fa-microphone"></i> Disable Voice';
+            toggleVoiceBtn.classList.replace('btn-outline-secondary', 'btn-secondary');
+            startListeningBtn.disabled = false;
+        } else {
+            toggleVoiceBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Enable Voice';
+            toggleVoiceBtn.classList.replace('btn-secondary', 'btn-outline-secondary');
+            startListeningBtn.disabled = true;
+            isListening = false;
+        }
+    });
+    
+    // Start listening for voice input
+    startListeningBtn.addEventListener('click', function() {
+        if (!isListening && voiceEnabled) {
+            isListening = true;
+            startListeningBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Listening...';
+            startListeningBtn.classList.replace('btn-outline-primary', 'btn-primary');
+            
+            // Call the listen endpoint
+            fetch('/listen')
+                .then(response => response.json())
+                .then(data => {
+                    isListening = false;
+                    startListeningBtn.innerHTML = '<i class="fas fa-microphone"></i> Start Listening';
+                    startListeningBtn.classList.replace('btn-primary', 'btn-outline-primary');
+                    
+                    if (data.success && data.text) {
+                        // Fill the input field with the recognized text
+                        userInput.value = data.text;
+                        // Send the message
+                        sendMessage(true);
+                    } else {
+                        // Show error message
+                        addMessageToChat('system', 'Sorry, I couldn\'t understand what you said. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    isListening = false;
+                    startListeningBtn.innerHTML = '<i class="fas fa-microphone"></i> Start Listening';
+                    startListeningBtn.classList.replace('btn-primary', 'btn-outline-primary');
+                    addMessageToChat('system', 'There was an error with speech recognition. Please try again.');
+                    console.error('Error:', error);
+                });
+        }
+    });
     
     // Send message when button is clicked
     sendBtn.addEventListener('click', function() {
@@ -26,9 +98,8 @@ document.addEventListener('DOMContentLoaded', function() {
             sendMessage();
         }
     });
-    
-    // Function to send message
-    function sendMessage() {
+      // Function to send message
+    function sendMessage(fromVoice = false) {
         const message = userInput.value.trim();
         
         if (message === '') {
@@ -75,12 +146,12 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             // Send request to API
             fetch('/chat', {
-                method: 'POST',
-                headers: {
+                method: 'POST',                headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    messages: messageHistory
+                    messages: messageHistory,
+                    use_voice: voiceEnabled && !fromVoice  // Use voice for AI response if enabled and not from voice input
                 }),
             })
             .then(response => response.json())

@@ -1,10 +1,11 @@
 # AI Scrum Master
 
-An AI-powered Scrum Master assistant that connects Ollama (with Mistral model) to Azure for storage and analytics. The application simulates a human-like Scrum Master to help facilitate Agile ceremonies.
+An AI-powered Scrum Master assistant that connects Ollama (with Mistral model) to Azure for storage and analytics. The application simulates a human-like Scrum Master to help facilitate Agile ceremonies, with voice capabilities for a more natural interaction.
 
 ## Features
 
 - Interactive chat interface with the AI Scrum Master
+- Voice input and output for natural conversation
 - Specialized interfaces for each Scrum ceremony:
   - Daily Scrum
   - Sprint Planning
@@ -19,6 +20,8 @@ An AI-powered Scrum Master assistant that connects Ollama (with Mistral model) t
 - Python 3.10+
 - Ollama installed locally with the Mistral model
 - Azure Storage Account (optional, for conversation logging)
+- Microphone and speakers (for voice interaction)
+- Modern web browser (Chrome recommended for best speech recognition)
 
 ## Installation
 

@@ -4,13 +4,14 @@ import requests
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union, Any
 import uvicorn
 from dotenv import load_dotenv
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
+from voice_assistant import VoiceAssistant
 
 # Load environment variables
 load_dotenv()
@@ -40,6 +41,11 @@ class ChatRequest(BaseModel):
     messages: List[ChatMessage]
     stream: bool = False
     model: str = MODEL_NAME
+    use_voice: bool = False
+
+class VoiceRequest(BaseModel):
+    text: str
+    use_gtts: bool = False
 
 # Initialize Azure Blob Storage client
 blob_service_client = None
@@ -119,6 +125,16 @@ async def chat(request: ChatRequest):
         if blob_service_client:
             log_conversation_to_azure(messages, response.json()["message"]["content"])
         
+        ai_response = response.json()["message"]["content"]
+        
+        # Use text-to-speech if requested
+        if request.use_voice:
+            try:
+                voice = VoiceAssistant(use_gtts=False)  # Use offline TTS for faster response
+                voice.text_to_speech(ai_response)
+            except Exception as e:
+                print(f"Voice error: {str(e)}")
+        
         return response.json()
     except requests.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Error communicating with Ollama: {str(e)}")
@@ -167,3 +183,28 @@ async def get_retrospective(request: Request):
 # Run the application
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+# Voice endpoints
+@app.post("/speak")
+async def speak_text(request: VoiceRequest):
+    """
+    Convert text to speech
+    """
+    try:
+        voice = VoiceAssistant(use_gtts=request.use_gtts)
+        voice.text_to_speech(request.text)
+        return {"success": True, "message": "Speech synthesis started"}
+    except Exception as e:
+        return {"success": False, "message": f"Error: {str(e)}"}
+
+@app.get("/listen")
+async def listen_for_speech():
+    """
+    Convert speech to text
+    """
+    try:
+        voice = VoiceAssistant()
+        text = voice.speech_to_text()
+        return {"success": True, "text": text}
+    except Exception as e:
+        return {"success": False, "text": "", "message": f"Error: {str(e)}"}
