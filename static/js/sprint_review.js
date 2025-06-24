@@ -45,11 +45,22 @@ document.addEventListener('DOMContentLoaded', function() {
             role: 'user',
             content: contextMessage + message
         });
-        
-        // Show typing indicator
+          // Show typing indicator
         const typingIndicator = document.createElement('div');
-        typingIndicator.className = 'message ai-message typing-indicator';
-        typingIndicator.innerHTML = '<p>Thinking...</p>';
+        typingIndicator.className = 'message ai-message';
+        
+        // Add AI avatar to typing indicator
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.innerHTML = '<i class="fas fa-user-tie"></i>';
+        typingIndicator.appendChild(avatar);
+        
+        // Add typing indicator content
+        const indicatorContent = document.createElement('div');
+        indicatorContent.className = 'message-content typing-indicator';
+        indicatorContent.innerHTML = '<p>Alex is thinking</p>';
+        typingIndicator.appendChild(indicatorContent);
+        
         chatBox.appendChild(typingIndicator);
         
         // Scroll to bottom
@@ -91,24 +102,52 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
         });
     }
-    
-    // Function to add message to chat
+      // Function to add message to chat
     function addMessageToChat(sender, content) {
         const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
         
         if (sender === 'user') {
-            messageDiv.className = 'message user-message';
-        } else {
-            messageDiv.className = 'message ai-message';
+            // Add user avatar
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.innerHTML = '<i class="fas fa-user"></i>';
+            messageDiv.appendChild(avatar);
+            
+            // Add message content
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            // Convert markdown-like formatting to HTML
+            content = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')              // Italic
+                .replace(/\n/g, '<br>');                           // New lines
+            
+            messageContent.innerHTML = content;
+            messageDiv.appendChild(messageContent);
+            
+        } else if (sender === 'ai') {
+            // Add AI avatar
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.innerHTML = '<i class="fas fa-user-tie"></i>';
+            messageDiv.appendChild(avatar);
+            
+            // Add message content
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            // Convert markdown-like formatting to HTML
+            content = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')              // Italic
+                .replace(/\n/g, '<br>');                           // New lines
+            
+            messageContent.innerHTML = content;
+            messageDiv.appendChild(messageContent);
         }
         
-        // Convert markdown-like formatting to HTML
-        content = content
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')              // Italic
-            .replace(/\n/g, '<br>');                           // New lines
-        
-        messageDiv.innerHTML = `<p>${content}</p>`;
         chatBox.appendChild(messageDiv);
         
         // Scroll to bottom

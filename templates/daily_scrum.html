@@ -1,50 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Scrum - AI Scrum Master</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <div class="container">
-        <header class="text-center my-4">
-            <h1>AI Scrum Master</h1>
-            <h2>Daily Scrum</h2>
-        </header>
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h4>Scrum Ceremonies</h4>
+            </div>
+            <div class="sidebar-menu">
+                <a href="/" class="sidebar-item">Home</a>
+                <a href="/daily-scrum" class="sidebar-item active">Daily Scrum</a>
+                <a href="/sprint-planning" class="sidebar-item">Sprint Planning</a>
+                <a href="/sprint-review" class="sidebar-item">Sprint Review</a>
+                <a href="/retrospective" class="sidebar-item">Retrospective</a>
+            </div>
+        </div>
         
-        <div class="row">
-            <div class="col-md-3">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        Navigation
+        <div class="content">
+            <header class="content-header">
+                <h1>Daily Scrum</h1>
+                <p class="lead">15-minute meeting to synchronize activities and create a plan for the day</p>
+            </header>
+            
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="guidelines-toggle">
+                        <button class="guideline-btn" id="toggle-guidelines" title="Show/Hide Guidelines">
+                            <i class="fas fa-info-circle"></i> Guidelines
+                        </button>
                     </div>
-                    <div class="list-group list-group-flush">
-                        <a href="/" class="list-group-item list-group-item-action">Home</a>
-                        <a href="/daily-scrum" class="list-group-item list-group-item-action active">Daily Scrum</a>
-                        <a href="/sprint-planning" class="list-group-item list-group-item-action">Sprint Planning</a>
-                        <a href="/sprint-review" class="list-group-item list-group-item-action">Sprint Review</a>
-                        <a href="/retrospective" class="list-group-item list-group-item-action">Retrospective</a>
+                    <div class="voice-controls">
+                        <button class="voice-btn" id="enable-voice" title="Enable Voice">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <button class="voice-btn" id="start-listening" title="Start Listening">
+                            <i class="fas fa-microphone"></i>
+                        </button>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-md-9">
-                <div class="card">
-                    <div class="card-header">
-                        Daily Scrum Assistant
+                
+                <div class="guidelines-panel" id="guidelines-panel">
+                    <div class="guidelines-content">
+                        <h5>Daily Scrum Guidelines:</h5>
+                        <ul>
+                            <li>Time-boxed to 15 minutes</li>
+                            <li>Answer three questions: What did I do yesterday? What will I do today? Are there any impediments?</li>
+                            <li>Focus on progress toward Sprint Goal</li>
+                        </ul>
                     </div>
-                    <div class="card-body">
-                        <div class="alert alert-info">
-                            <p><strong>Daily Scrum Guidelines:</strong></p>
-                            <ul>
-                                <li>Time-boxed to 15 minutes</li>
-                                <li>Answer three questions: What did I do yesterday? What will I do today? Are there any impediments?</li>
-                                <li>Focus on progress toward Sprint Goal</li>
-                            </ul>
-                        </div>
-                          <div id="chat-box" class="mb-3">
+                </div><div id="chat-box" class="mb-3">
                             <div class="message system-message">
                                 <p>Hey team! Alex here. How's everyone doing this morning? Let's get our daily standup started.</p>
                                 <p>Keep in mind we want to stay focused on three things:</p>
@@ -55,9 +67,44 @@
                             </div>
                         </div>
                         
-                        <div class="input-group">
+                        <div class="input-group mb-3">
                             <input type="text" id="user-input" class="form-control" placeholder="Type your update here...">
                             <button id="send-btn" class="btn btn-primary">Send</button>
+                            <button id="voice-btn" class="btn btn-outline-secondary" title="Voice Input">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                        </div>
+
+                        <div class="card mt-4" id="azure-devops-section">
+                            <div class="card-header">
+                                Sprint Work Items
+                                <button class="btn btn-sm btn-outline-primary float-end" id="refresh-work-items">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="sprint-info" class="mb-3">
+                                    <p>Loading sprint information...</p>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover" id="work-items-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Title</th>
+                                                <th>Type</th>
+                                                <th>State</th>
+                                                <th>Assigned To</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="5" class="text-center">Loading work items...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatBox = document.getElementById('chat-box');
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
+    const voiceBtn = document.getElementById('voice-btn');
+    const refreshWorkItemsBtn = document.getElementById('refresh-work-items');
+    const workItemsTable = document.getElementById('work-items-table');
+    const sprintInfoDiv = document.getElementById('sprint-info');
     
     // Message history
     let messageHistory = [
@@ -17,6 +21,21 @@ document.addEventListener('DOMContentLoaded', function() {
     let teamMembers = [];
     let currentStage = 'greeting'; // greeting, yesterday, today, blockers, next-person
     let lastResponseType = '';
+    let sprintDetails = null;
+    let workItems = [];
+    
+    // Load Azure DevOps data on page load
+    loadAzureDevOpsData();
+    
+    // Refresh work items when button clicked
+    if (refreshWorkItemsBtn) {
+        refreshWorkItemsBtn.addEventListener('click', loadAzureDevOpsData);
+    }
+    
+    // Voice input
+    if (voiceBtn) {
+        voiceBtn.addEventListener('click', startVoiceInput);
+    }
     
     // Send message when button is clicked
     sendBtn.addEventListener('click', function() {
@@ -29,6 +48,83 @@ document.addEventListener('DOMContentLoaded', function() {
             sendMessage();
         }
     });
+    
+    // Function to load Azure DevOps data
+    function loadAzureDevOpsData() {
+        // Show loading state
+        sprintInfoDiv.innerHTML = '<p>Loading sprint information...</p>';
+        workItemsTable.querySelector('tbody').innerHTML = '<tr><td colspan="5" class="text-center">Loading work items...</td></tr>';
+        
+        // Load sprint details
+        fetch('/azure-devops/sprint-details')
+            .then(response => response.json())
+            .then(data => {
+                sprintDetails = data;
+                if (data.error) {
+                    sprintInfoDiv.innerHTML = `<div class="alert alert-warning">${data.error}</div>`;
+                } else {
+                    const startDate = new Date(data.start_date).toLocaleDateString();
+                    const endDate = new Date(data.finish_date).toLocaleDateString();
+                    sprintInfoDiv.innerHTML = `
+                        <div class="alert alert-info">
+                            <h5>${data.name}</h5>
+                            <p><strong>Period:</strong> ${startDate} - ${endDate}</p>
+                            <p><strong>Path:</strong> ${data.path}</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching sprint details:', error);
+                sprintInfoDiv.innerHTML = `<div class="alert alert-danger">Error loading sprint information: ${error.message}</div>`;
+            });
+        
+        // Load work items
+        fetch('/azure-devops/work-items')
+            .then(response => response.json())
+            .then(data => {
+                workItems = data;
+                if (data.error) {
+                    workItemsTable.querySelector('tbody').innerHTML = `<tr><td colspan="5" class="text-center text-warning">${data.error}</td></tr>`;
+                } else if (data.length === 0) {
+                    workItemsTable.querySelector('tbody').innerHTML = '<tr><td colspan="5" class="text-center">No work items found for this sprint</td></tr>';
+                } else {
+                    const tbody = workItemsTable.querySelector('tbody');
+                    tbody.innerHTML = '';
+                    
+                    data.forEach(item => {
+                        const row = document.createElement('tr');
+                        
+                        // Set row color based on state
+                        if (item.state === 'Done') {
+                            row.className = 'table-success';
+                        } else if (item.state === 'In Progress') {
+                            row.className = 'table-info';
+                        } else if (item.state === 'New' || item.state === 'To Do') {
+                            row.className = 'table-light';
+                        }
+                        
+                        row.innerHTML = `
+                            <td><a href="${item.url}" target="_blank">${item.id}</a></td>
+                            <td>${item.title}</td>
+                            <td><span class="badge bg-secondary">${item.type}</span></td>
+                            <td>${item.state}</td>
+                            <td>${item.assigned_to}</td>
+                        `;
+                        tbody.appendChild(row);
+                        
+                        // Add team member to list if not already present
+                        if (item.assigned_to !== 'Unassigned' && !teamMembers.includes(item.assigned_to)) {
+                            teamMembers.push(item.assigned_to);
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching work items:', error);
+                workItemsTable.querySelector('tbody').innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error loading work items: ${error.message}</td></tr>`;
+            });
+    }
     
     // Function to send message
     function sendMessage() {
@@ -74,20 +170,21 @@ document.addEventListener('DOMContentLoaded', function() {
         messageHistory.push({
             role: 'user',
             content: contextMessage
-        });
-          // Show typing indicator with delay to simulate human typing
+        });          // Show typing indicator with delay to simulate human typing
         const typingIndicator = document.createElement('div');
-        typingIndicator.className = 'message ai-message typing-indicator';
+        typingIndicator.className = 'message ai-message';
         
-        // Add Alex's name
-        const nameSpan = document.createElement('div');
-        nameSpan.className = 'message-name';
-        nameSpan.textContent = 'Alex (Scrum Master)';
-        typingIndicator.appendChild(nameSpan);
+        // Add AI avatar
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.innerHTML = '<i class="fas fa-user-tie"></i>';
+        typingIndicator.appendChild(avatar);
         
-        const contentP = document.createElement('p');
-        contentP.textContent = 'Alex is typing';
-        typingIndicator.appendChild(contentP);
+        // Add message content
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content typing-indicator';
+        messageContent.innerHTML = '<p>Alex is typing</p>';
+        typingIndicator.appendChild(messageContent);
         
         chatBox.appendChild(typingIndicator);
         
@@ -265,27 +362,94 @@ document.addEventListener('DOMContentLoaded', function() {
                message.includes("finished") ||
                message.length < 10;
     }
-    
-    // Function to add message to chat
+      // Function to add message to chat
     function addMessageToChat(sender, content) {
         const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
         
         if (sender === 'user') {
-            messageDiv.className = 'message user-message';
-        } else {
-            messageDiv.className = 'message ai-message';
+            // Add user avatar
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.innerHTML = '<i class="fas fa-user"></i>';
+            messageDiv.appendChild(avatar);
+            
+            // Add message content
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            // Convert markdown-like formatting to HTML
+            content = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')              // Italic
+                .replace(/\n/g, '<br>');                           // New lines
+            
+            messageContent.innerHTML = content;
+            messageDiv.appendChild(messageContent);
+            
+        } else if (sender === 'ai') {
+            // Add AI avatar
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.innerHTML = '<i class="fas fa-user-tie"></i>';
+            messageDiv.appendChild(avatar);
+            
+            // Add message content
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            // Convert markdown-like formatting to HTML
+            content = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')              // Italic
+                .replace(/\n/g, '<br>');                           // New lines
+            
+            messageContent.innerHTML = content;
+            messageDiv.appendChild(messageContent);
         }
         
-        // Convert markdown-like formatting to HTML
-        content = content
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')              // Italic
-            .replace(/\n/g, '<br>');                           // New lines
-        
-        messageDiv.innerHTML = `<p>${content}</p>`;
         chatBox.appendChild(messageDiv);
         
         // Scroll to bottom
         chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    
+    // Function for voice input
+    function startVoiceInput() {
+        // Update button to show recording status
+        voiceBtn.classList.add('btn-danger');
+        voiceBtn.classList.remove('btn-outline-secondary');
+        voiceBtn.innerHTML = '<i class="fas fa-microphone"></i> Recording...';
+        
+        // Call the backend speech-to-text endpoint
+        fetch('/listen')
+            .then(response => response.json())
+            .then(data => {
+                // Reset button
+                voiceBtn.classList.remove('btn-danger');
+                voiceBtn.classList.add('btn-outline-secondary');
+                voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                
+                if (data.success) {
+                    // Add the recognized text to the input field
+                    userInput.value = data.text;
+                    userInput.focus();
+                    
+                    // If text was recognized, send the message
+                    if (data.text && data.text.trim() !== '') {
+                        sendMessage();
+                    }
+                } else {
+                    console.error('Speech recognition error:', data.message);
+                    alert('Voice recognition failed. Please try again or type your message.');
+                }
+            })
+            .catch(error => {
+                console.error('Error with voice recognition:', error);
+                voiceBtn.classList.remove('btn-danger');
+                voiceBtn.classList.add('btn-outline-secondary');
+                voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                alert('Voice recognition error. Please try again or type your message.');
+            });
     }
 });

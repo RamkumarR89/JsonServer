@@ -13,6 +13,7 @@ An AI-powered Scrum Master assistant that connects Ollama (with Mistral model) t
   - Retrospective
 - Integration with Ollama using the Mistral model
 - Azure Blob Storage integration for conversation logging and analytics
+- Azure DevOps integration for fetching sprint and work item data
 - Responsive web interface
 
 ## Prerequisites
@@ -20,6 +21,7 @@ An AI-powered Scrum Master assistant that connects Ollama (with Mistral model) t
 - Python 3.10+
 - Ollama installed locally with the Mistral model
 - Azure Storage Account (optional, for conversation logging)
+- Azure DevOps account with PAT (optional, for work item integration)
 - Microphone and speakers (for voice interaction)
 - Modern web browser (Chrome recommended for best speech recognition)
 
@@ -46,11 +48,16 @@ An AI-powered Scrum Master assistant that connects Ollama (with Mistral model) t
    ```
    # Ollama Configuration
    OLLAMA_API_URL=http://localhost:11434/api
-   MODEL_NAME=mistral
-
-   # Azure Configuration (optional)
+   MODEL_NAME=mistral   # Azure Configuration (optional)
    AZURE_STORAGE_CONNECTION_STRING=your_azure_storage_connection_string_here
    AZURE_CONTAINER_NAME=scrumdata
+   
+   # Azure DevOps Configuration (optional)
+   AZURE_DEVOPS_ORG_URL=https://dev.azure.com/your-org
+   AZURE_DEVOPS_PROJECT_NAME=YourProject
+   AZURE_DEVOPS_TEAM_NAME=YourTeam
+   AZURE_DEVOPS_PAT=your_personal_access_token_here
+   CURRENT_ITERATION=YourProject\\YourIteration
    ```
 
 ## Running the Application

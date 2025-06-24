@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatBox = document.getElementById('chat-box');
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
+    const voiceBtn = document.getElementById('voice-btn');
+    const enableVoiceBtn = document.getElementById('enable-voice');
+    const startListeningBtn = document.getElementById('start-listening');
     
     // Message history
     let messageHistory = [
@@ -11,61 +14,75 @@ document.addEventListener('DOMContentLoaded', function() {
             content: 'Hi there! I\'m Alex, your Scrum Master. I\'ve been working with Agile teams for about 8 years now. How can I help you with your Scrum practices today?'
         }
     ];
-      // Name detection for personalization
+    
+    // Name detection for personalization
     let userName = '';
     
     // Voice settings
     let voiceEnabled = false;
     let isListening = false;
     
-    // Create voice control buttons
-    const voiceControlsDiv = document.createElement('div');
-    voiceControlsDiv.className = 'voice-controls mb-3';
-    voiceControlsDiv.innerHTML = `
-        <button id="toggle-voice" class="btn btn-outline-secondary">
-            <i class="fas fa-microphone-slash"></i> Enable Voice
-        </button>
-        <button id="start-listening" class="btn btn-outline-primary" disabled>
-            <i class="fas fa-microphone"></i> Start Listening
-        </button>
-    `;
+    // Enable voice button
+    if (enableVoiceBtn) {
+        enableVoiceBtn.addEventListener('click', function() {
+            voiceEnabled = !voiceEnabled;
+            if (voiceEnabled) {
+                enableVoiceBtn.innerHTML = '<i class="fas fa-volume-mute"></i> Disable Voice';
+                enableVoiceBtn.classList.add('btn-secondary');
+                enableVoiceBtn.classList.remove('btn-outline-secondary');
+            } else {
+                enableVoiceBtn.innerHTML = '<i class="fas fa-volume-up"></i> Enable Voice';
+                enableVoiceBtn.classList.remove('btn-secondary');
+                enableVoiceBtn.classList.add('btn-outline-secondary');
+            }
+        });
+    }
     
-    // Insert voice controls before the chat box
-    chatBox.parentNode.insertBefore(voiceControlsDiv, chatBox);
+    // Start listening button
+    if (startListeningBtn) {
+        startListeningBtn.addEventListener('click', startVoiceInput);
+    }
     
-    // Get voice control buttons
-    const toggleVoiceBtn = document.getElementById('toggle-voice');
-    const startListeningBtn = document.getElementById('start-listening');
+    // Voice input button
+    if (voiceBtn) {
+        voiceBtn.addEventListener('click', startVoiceInput);
+    }
     
-    // Toggle voice controls
-    toggleVoiceBtn.addEventListener('click', function() {
-        voiceEnabled = !voiceEnabled;
-        if (voiceEnabled) {
-            toggleVoiceBtn.innerHTML = '<i class="fas fa-microphone"></i> Disable Voice';
-            toggleVoiceBtn.classList.replace('btn-outline-secondary', 'btn-secondary');
-            startListeningBtn.disabled = false;
-        } else {
-            toggleVoiceBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Enable Voice';
-            toggleVoiceBtn.classList.replace('btn-secondary', 'btn-outline-secondary');
-            startListeningBtn.disabled = true;
-            isListening = false;
-        }
-    });
-    
-    // Start listening for voice input
-    startListeningBtn.addEventListener('click', function() {
-        if (!isListening && voiceEnabled) {
+    // Function to start voice input
+    function startVoiceInput() {
+        if (!isListening) {
             isListening = true;
-            startListeningBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Listening...';
-            startListeningBtn.classList.replace('btn-outline-primary', 'btn-primary');
             
-            // Call the listen endpoint
+            // Show recording state
+            if (startListeningBtn) {
+                startListeningBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Listening...';
+                startListeningBtn.classList.add('btn-danger');
+                startListeningBtn.classList.remove('btn-outline-secondary');
+            }
+            
+            if (voiceBtn) {
+                voiceBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                voiceBtn.classList.add('btn-danger');
+                voiceBtn.classList.remove('btn-outline-secondary');
+            }
+              // Call the listen endpoint
             fetch('/listen')
                 .then(response => response.json())
                 .then(data => {
                     isListening = false;
-                    startListeningBtn.innerHTML = '<i class="fas fa-microphone"></i> Start Listening';
-                    startListeningBtn.classList.replace('btn-primary', 'btn-outline-primary');
+                    
+                    // Reset button states
+                    if (startListeningBtn) {
+                        startListeningBtn.innerHTML = '<i class="fas fa-microphone"></i> Start Listening';
+                        startListeningBtn.classList.remove('btn-danger');
+                        startListeningBtn.classList.add('btn-outline-secondary');
+                    }
+                    
+                    if (voiceBtn) {
+                        voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                        voiceBtn.classList.remove('btn-danger');
+                        voiceBtn.classList.add('btn-outline-secondary');
+                    }
                     
                     if (data.success && data.text) {
                         // Fill the input field with the recognized text
@@ -85,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error('Error:', error);
                 });
         }
-    });
+    }
     
     // Send message when button is clicked
     sendBtn.addEventListener('click', function() {
@@ -130,11 +147,22 @@ document.addEventListener('DOMContentLoaded', function() {
             role: 'user',
             content: contextMessage
         });
-        
-        // Show typing indicator with random delay
+          // Show typing indicator with random delay
         const typingIndicator = document.createElement('div');
-        typingIndicator.className = 'message ai-message typing-indicator';
-        typingIndicator.innerHTML = '<p>Alex is typing...</p>';
+        typingIndicator.className = 'message ai-message';
+        
+        // Add AI avatar to typing indicator
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.innerHTML = '<i class="fas fa-user-tie"></i>';
+        typingIndicator.appendChild(avatar);
+        
+        // Add typing indicator content
+        const indicatorContent = document.createElement('div');
+        indicatorContent.className = 'message-content typing-indicator';
+        indicatorContent.innerHTML = '<p>Alex is typing</p>';
+        typingIndicator.appendChild(indicatorContent);
+        
         chatBox.appendChild(typingIndicator);
         
         // Scroll to bottom
@@ -221,41 +249,61 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         return null;
-    }
-    
-    // Function to add message to chat
+    }    // Function to add message to chat
     function addMessageToChat(sender, content) {
         const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
         
         if (sender === 'user') {
-            messageDiv.className = 'message user-message';
+            // Add user avatar
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.innerHTML = '<i class="fas fa-user"></i>';
+            messageDiv.appendChild(avatar);
             
-            // Add user's name if available
-            if (userName) {
-                const nameSpan = document.createElement('div');
-                nameSpan.className = 'message-name';
-                nameSpan.textContent = userName;
-                messageDiv.appendChild(nameSpan);
-            }
-        } else {
-            messageDiv.className = 'message ai-message';
+            // Add message content
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
             
-            // Add Alex's name
-            const nameSpan = document.createElement('div');
-            nameSpan.className = 'message-name';
-            nameSpan.textContent = 'Alex (Scrum Master)';
-            messageDiv.appendChild(nameSpan);
+            // Convert markdown-like formatting to HTML
+            content = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')              // Italic
+                .replace(/\n/g, '<br>');                           // New lines
+            
+            messageContent.innerHTML = content;
+            messageDiv.appendChild(messageContent);
+            
+        } else if (sender === 'ai') {
+            // Add AI avatar
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.innerHTML = '<i class="fas fa-user-tie"></i>';
+            messageDiv.appendChild(avatar);
+            
+            // Add message content
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            // Convert markdown-like formatting to HTML
+            content = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')              // Italic
+                .replace(/\n/g, '<br>');                           // New lines
+            
+            messageContent.innerHTML = content;
+            messageDiv.appendChild(messageContent);
+            
+        } else if (sender === 'system') {
+            // System messages (like errors) are displayed differently
+            messageDiv.className = 'message system-message';
+            
+            // Add message content
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.innerHTML = `<i class="fas fa-info-circle"></i> ${content}`;
+            messageDiv.appendChild(messageContent);
         }
-        
-        // Convert markdown-like formatting to HTML
-        content = content
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')              // Italic
-            .replace(/\n/g, '<br>');                           // New lines
-        
-        const contentP = document.createElement('p');
-        contentP.innerHTML = content;
-        messageDiv.appendChild(contentP);
         
         chatBox.appendChild(messageDiv);
         

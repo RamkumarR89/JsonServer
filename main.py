@@ -12,6 +12,12 @@ from dotenv import load_dotenv
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 from voice_assistant import VoiceAssistant
+try:
+    from azure_devops_client import azure_devops
+    AZURE_DEVOPS_ENABLED = True
+except (ImportError, ValueError) as e:
+    print(f"Azure DevOps integration disabled: {str(e)}")
+    AZURE_DEVOPS_ENABLED = False
 
 # Load environment variables
 load_dotenv()
@@ -86,6 +92,11 @@ MEETING FACILITATION:
 - For Sprint Planning: Help the team brainstorm and collaborate on goals
 - For Sprint Reviews: Facilitate discussions between the team and stakeholders
 - For Retrospectives: Create a safe space for honest feedback and guide the team to actionable improvements
+
+TEAM CONTEXT:
+- You are working with the Shiptech-FuelRef team on the Shiptech project
+- The team is currently working on Sprint 12.10.0
+- You have access to the team's Azure DevOps data, including work items, team members, and sprint progress
 
 Always maintain context throughout the conversation and refer back to previous points made by team members. Use people's names frequently and build rapport by remembering details they share.
 
@@ -208,3 +219,117 @@ async def listen_for_speech():
         return {"success": True, "text": text}
     except Exception as e:
         return {"success": False, "text": "", "message": f"Error: {str(e)}"}
+
+# Azure DevOps endpoints
+@app.get("/azure-devops/sprint-details")
+async def get_sprint_details():
+    """
+    Get details about the current sprint from Azure DevOps
+    """
+    if not AZURE_DEVOPS_ENABLED:
+        return JSONResponse(
+            status_code=503,
+            content={"error": "Azure DevOps integration is not enabled"}
+        )
+    
+    try:
+        sprint_details = azure_devops.get_current_sprint_details()
+        return sprint_details
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to get sprint details: {str(e)}"}
+        )
+
+@app.get("/azure-devops/work-items")
+async def get_work_items(iteration_path: Optional[str] = None):
+    """
+    Get work items for the current sprint or specified iteration from Azure DevOps
+    """
+    if not AZURE_DEVOPS_ENABLED:
+        return JSONResponse(
+            status_code=503,
+            content={"error": "Azure DevOps integration is not enabled"}
+        )
+    
+    try:
+        work_items = azure_devops.get_sprint_work_items(iteration_path)
+        return work_items
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to get work items: {str(e)}"}
+        )
+
+@app.get("/azure-devops/burndown")
+async def get_burndown():
+    """
+    Get burndown data for the current sprint from Azure DevOps
+    """
+    if not AZURE_DEVOPS_ENABLED:
+        return JSONResponse(
+            status_code=503,
+            content={"error": "Azure DevOps integration is not enabled"}
+        )
+    
+    try:
+        burndown = azure_devops.get_sprint_burndown()
+        return burndown
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to get burndown data: {str(e)}"}
+        )
+
+@app.get("/azure-devops/team-members")
+async def get_team_members():
+    """
+    Get team members for the current team from Azure DevOps
+    """
+    if not AZURE_DEVOPS_ENABLED:
+        return JSONResponse(
+            status_code=503,
+            content={"error": "Azure DevOps integration is not enabled"}
+        )
+    
+    try:
+        team_members = azure_devops.get_team_members()
+        return team_members
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"Failed to get team members: {str(e)}"}
+        )
+
+@app.get("/azure-devops/status")
+async def get_azure_devops_status():
+    """
+    Check if Azure DevOps integration is enabled and properly configured
+    """
+    if not AZURE_DEVOPS_ENABLED:
+        return {"enabled": False, "message": "Azure DevOps integration is not enabled"}
+    
+    try:
+        # Try to get basic info to validate the connection
+        team_members = azure_devops.get_team_members()
+        sprint_details = azure_devops.get_current_sprint_details()
+        
+        return {
+            "enabled": True,
+            "connected": True,
+            "organization": os.getenv("AZURE_DEVOPS_ORG_URL"),
+            "project": os.getenv("AZURE_DEVOPS_PROJECT_NAME"),
+            "team": os.getenv("AZURE_DEVOPS_TEAM_NAME"),
+            "current_iteration": os.getenv("CURRENT_ITERATION"),
+            "team_members_count": len(team_members) if isinstance(team_members, list) else 0,
+            "sprint_details": sprint_details
+        }
+    except Exception as e:
+        return {
+            "enabled": True,
+            "connected": False,
+            "organization": os.getenv("AZURE_DEVOPS_ORG_URL"),
+            "project": os.getenv("AZURE_DEVOPS_PROJECT_NAME"),
+            "team": os.getenv("AZURE_DEVOPS_TEAM_NAME"),
+            "error": str(e)
+        }

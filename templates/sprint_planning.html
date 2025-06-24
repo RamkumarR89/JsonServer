@@ -1,69 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sprint Planning - AI Scrum Master</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <div class="container">
-        <header class="text-center my-4">
-            <h1>AI Scrum Master</h1>
-            <h2>Sprint Planning</h2>
-        </header>
-        
-        <div class="row">
-            <div class="col-md-3">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        Navigation
-                    </div>
-                    <div class="list-group list-group-flush">
-                        <a href="/" class="list-group-item list-group-item-action">Home</a>
-                        <a href="/daily-scrum" class="list-group-item list-group-item-action">Daily Scrum</a>
-                        <a href="/sprint-planning" class="list-group-item list-group-item-action active">Sprint Planning</a>
-                        <a href="/sprint-review" class="list-group-item list-group-item-action">Sprint Review</a>
-                        <a href="/retrospective" class="list-group-item list-group-item-action">Retrospective</a>
-                    </div>
-                </div>
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h4>Scrum Ceremonies</h4>
             </div>
-            
-            <div class="col-md-9">
-                <div class="card">
-                    <div class="card-header">
-                        Sprint Planning Assistant
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-info">
-                            <p><strong>Sprint Planning Guidelines:</strong></p>
-                            <ul>
-                                <li>Time-boxed to 8 hours for a one-month Sprint (proportionally less for shorter Sprints)</li>
-                                <li>Define Sprint Goal and select Product Backlog items for the Sprint</li>
-                                <li>Plan how selected items will be delivered</li>
-                            </ul>
-                        </div>
-                          <div id="chat-box" class="mb-3">
-                            <div class="message system-message">
-                                <p>Good morning team! Alex here. I've got us set up for our sprint planning session today.</p>
-                                <p>I've already taken a look at the backlog, and we've got some interesting items lined up. Before we dive into selecting stories, I think we should start by defining what we want to achieve this sprint - our Sprint Goal.</p>
-                                <p>So, what are your thoughts on what we should focus on for this upcoming sprint?</p>
-                            </div>
-                        </div>
-                        
-                        <div class="input-group">
-                            <input type="text" id="user-input" class="form-control" placeholder="Type your message here...">
-                            <button id="send-btn" class="btn btn-primary">Send</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="sidebar-menu">
+                <a href="/" class="sidebar-item">Home</a>
+                <a href="/daily-scrum" class="sidebar-item">Daily Scrum</a>
+                <a href="/sprint-planning" class="sidebar-item active">Sprint Planning</a>
+                <a href="/sprint-review" class="sidebar-item">Sprint Review</a>
+                <a href="/retrospective" class="sidebar-item">Retrospective</a>
             </div>
         </div>
         
-        <footer class="text-center mt-4">
-            <p>AI Scrum Master - Powered by Ollama with Mistral and Azure</p>
-        </footer>
+        <div class="content">
+            <header class="content-header">
+                <h1>Sprint Planning</h1>
+                <p class="lead">Define your Sprint Goal and plan how to deliver the selected backlog items</p>
+            </header>
+            
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="guidelines-toggle">
+                        <button class="guideline-btn" id="toggle-guidelines" title="Show/Hide Guidelines">
+                            <i class="fas fa-info-circle"></i> Guidelines
+                        </button>
+                    </div>
+                    <div class="voice-controls">
+                        <button class="voice-btn" id="enable-voice" title="Enable Voice">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <button class="voice-btn" id="start-listening" title="Start Listening">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                </div>
+                  <div class="guidelines-panel" id="guidelines-panel">
+                    <div class="guidelines-content">
+                        <h5>Sprint Planning Guidelines:</h5>
+                        <ul>
+                            <li>Time-boxed to 8 hours for a one-month Sprint (proportionally less for shorter Sprints)</li>
+                            <li>Define Sprint Goal and select Product Backlog items for the Sprint</li>
+                            <li>Plan how selected items will be delivered</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chat-box">
+                    <div class="message ai-message">
+                        <div class="avatar">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="message-content">
+                            <p>Good morning team! Alex here. I've got us set up for our sprint planning session today.</p>
+                            <p>I've already taken a look at the backlog, and we've got some interesting items lined up. Before we dive into selecting stories, I think we should start by defining what we want to achieve this sprint - our Sprint Goal.</p>
+                            <p>So, what are your thoughts on what we should focus on for this upcoming sprint?</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-container">
+                    <div class="chat-input">
+                        <input type="text" id="user-input" placeholder="Type your message here...">
+                        <button id="voice-btn" class="input-voice-btn" title="Voice Input">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                    <button id="send-btn" class="send-btn">Send</button>
+                </div>
+            </div>
+            
+            <footer class="content-footer">
+                <p>AI Scrum Master - Powered by Ollama with Mistral and Azure</p>
+            </footer>
+        </div>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
